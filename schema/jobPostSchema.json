@@ -1,0 +1,68 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "title": "Application Engineer",
+            "salary": 123456.78,
+            "equity": 0.04,
+            "company_handle": "AAPL"
+        }
+    ],
+    "required": [
+        "title",
+        "salary",
+        "equity",
+        "company_handle"
+    ],
+    "properties": {
+        "title": {
+            "$id": "#/properties/title",
+            "type": "string",
+            "title": "The title schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "Application Engineer"
+            ]
+        },
+        "salary": {
+            "$id": "#/properties/salary",
+            "type": "number",
+            "title": "The salary schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0.0,
+            "minimum": 0,
+            "examples": [
+                123456.78
+            ]
+        },
+        "equity": {
+            "$id": "#/properties/equity",
+            "type": "number",
+            "title": "The equity schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0.0,
+            "minimum": 0,
+            "maximum": 1,
+            "examples": [
+                0.04
+            ]
+        },
+        "company_handle": {
+            "$id": "#/properties/company_handle",
+            "type": "string",
+            "title": "The company_handle schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "AAPL"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

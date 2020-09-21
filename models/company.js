@@ -6,7 +6,6 @@ class Company {
     /** get all the companies */
     static async all(query) {
         let { search, min_employees, max_employees } = query;
-        console.log(search, min_employees, max_employees);
         if (!search) {
             search = '';
         }
@@ -37,7 +36,11 @@ class Company {
         if (!result.rows[0]) {
             throw new ExpressError(`No such company:${handle}`, 404);
         }
-        return result.rows[0];
+        let compHandle = result.rows[0].handle;
+        const jobs = await db.query(`SELECT * FROM jobs WHERE company_handle=$1`, [compHandle]);
+        let company = result.rows[0];
+        company.jobs = jobs.rows;
+        return company;
     }
 
     static async create(data) {

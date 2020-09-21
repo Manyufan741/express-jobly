@@ -4,9 +4,11 @@ const request = require("supertest");
 const db = require("../../db");
 const app = require("../../app");
 const Company = require("../../models/company");
+const Job = require("../../models/job");
 
 describe("Test companies routes", function () {
     beforeEach(async function () {
+        // await db.query("DELETE FROM jobs");
         await db.query("DELETE FROM companies");
         let u = await Company.create({
             handle: "TSLA",
@@ -14,6 +16,12 @@ describe("Test companies routes", function () {
             num_employees: 7777,
             description: "World Number 1",
             logo_url: "http"
+        });
+        await Job.create({
+            title: "Application Engineer",
+            salary: 123,
+            equity: 0.1,
+            company_handle: "TSLA"
         });
     });
 
@@ -53,6 +61,8 @@ describe("Test companies routes", function () {
         expect(response.statusCode).toEqual(200);
         expect(response.body.company.handle).toEqual("TSLA");
         expect(response.body.company.name).toEqual("Tesla");
+        expect(response.body.company.jobs[0].title).toEqual("Application Engineer");
+        expect(response.body.company.jobs[0].salary).toEqual(123);
     });
 
     test("Failing GET /companies/:handle", async function () {

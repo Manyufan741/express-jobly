@@ -21,7 +21,7 @@ router.get("/", async (req, res, next) => {
     }
 });
 
-/** GET /:handle - get a company by its handle. 
+/** GET /:handle - get a company by its handle. Also returning the jobs related to it.
  * 
  * => {company : companyData}
  * 

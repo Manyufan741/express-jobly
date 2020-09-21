@@ -1,12 +1,13 @@
-DROP TABLE IF EXISTS companies;
--- DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS jobs;
 
-CREATE TABLE companies (
-    handle text PRIMARY KEY,
-    name text NOT NULL UNIQUE,
-    num_employees integer,
-    description text,
-    logo_url text
+CREATE TABLE jobs (
+    id serial PRIMARY KEY,
+    title text NOT NULL,
+    salary float NOT NULL,
+    equity float NOT NULL,
+    company_handle text NOT NULL REFERENCES companies ON DELETE CASCADE,
+    date_posted date DEFAULT CURRENT_DATE NOT NULL,
+    CONSTRAINT equity_check CHECK (equity <= 1 AND equity >= 0)
 );
 
 -- CREATE TABLE messages (
@@ -18,6 +19,5 @@ CREATE TABLE companies (
 --     read_at timestamp with time zone
 -- );
 
-INSERT INTO companies VALUES ('TSLA', 'Tesla', 1234, 'World leading EV maker','tatata');
-INSERT INTO companies VALUES ('AAPL', 'Apple', 4321, 'World leading phone maker','ffddss');
+INSERT INTO jobs (title, salary, equity, company_handle) VALUES ('Application Engineer', 98000.44, 0.05, 'TSLA'), ('Software Engineer', 151348.98, 0.25, 'AAPL');
 
