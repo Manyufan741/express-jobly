@@ -1,0 +1,60 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "name": "Tesla",
+            "num_employees": 100000,
+            "description": "World leading EV maker.",
+            "logo_url": "https://blog.logomyway.com/wp-content/uploads/2019/06/tesla-logo.jpg"
+        }
+    ],
+    "required": [],
+    "properties": {
+        "name": {
+            "$id": "#/properties/name",
+            "type": "string",
+            "title": "The name schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "Tesla"
+            ]
+        },
+        "num_employees": {
+            "$id": "#/properties/num_employees",
+            "type": "integer",
+            "title": "The num_employees schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0,
+            "examples": [
+                100000
+            ]
+        },
+        "description": {
+            "$id": "#/properties/description",
+            "type": "string",
+            "title": "The description schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "World leading EV maker."
+            ]
+        },
+        "logo_url": {
+            "$id": "#/properties/logo_url",
+            "type": "string",
+            "title": "The logo_url schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "https://blog.logomyway.com/wp-content/uploads/2019/06/tesla-logo.jpg"
+            ]
+        }
+    },
+    "additionalProperties": true
+}
