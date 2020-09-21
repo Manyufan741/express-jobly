@@ -48,6 +48,62 @@ describe("Test companies routes", function () {
         expect(response.statusCode).toEqual(400);
     });
 
+    test("GET /companies/:handle", async function () {
+        let response = await request(app).get("/companies/TSLA");
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.company.handle).toEqual("TSLA");
+        expect(response.body.company.name).toEqual("Tesla");
+    });
+
+    test("Failing GET /companies/:handle", async function () {
+        let response = await request(app).get("/companies/TS");
+        expect(response.statusCode).toEqual(404);
+    });
+
+    test("POST /companies", async function () {
+        let response = await request(app).post("/companies").send({
+            handle: "AAPL",
+            name: "Apple"
+        });
+        expect(response.statusCode).toEqual(201);
+        expect(response.body.company.handle).toEqual("AAPL");
+        expect(response.body.company.name).toEqual("Apple");
+    });
+
+    test("Failing POST /companies", async function () {
+        let response = await request(app).post("/companies").send({
+            handle: "AAPL",
+        });
+        expect(response.statusCode).toEqual(400);
+    });
+
+    test("PATCH /companies/:handle", async function () {
+        let response = await request(app).patch("/companies/TSLA").send({ name: "Tesla Inc.", logo_url: "Tesla logo" });
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.company.name).toEqual("Tesla Inc.");
+        expect(response.body.company.logo_url).toEqual("Tesla logo");
+    });
+
+    test("Failing PATCH /companies/:handle with attempt to change handle", async function () {
+        let response = await request(app).patch("/companies/TSLA").send({ handle: "TES" });
+        expect(response.statusCode).toEqual(400);
+    });
+
+    test("Failing PATCH /companies/:handle with wrong update datatype", async function () {
+        let response = await request(app).patch("/companies/TSLA").send({ description: 12 });
+        expect(response.statusCode).toEqual(400);
+    });
+
+    test("DELETE /companies/:handle", async function () {
+        let response = await request(app).delete("/companies/TSLA");
+        expect(response.statusCode).toEqual(200);
+        expect(response.body.message).toEqual("Company deleted");
+    });
+
+    test("Failing DELETE /companies/:handle", async function () {
+        let response = await request(app).delete("/companies/TSL");
+        expect(response.statusCode).toEqual(404);
+    });
 });
 
 afterAll(async function () {

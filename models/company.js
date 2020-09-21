@@ -1,5 +1,6 @@
 const db = require("../db");
 const ExpressError = require("../helpers/expressError");
+const sqlForPartialUpdate = require("../helpers/partialUpdate");
 
 class Company {
     /** get all the companies */
@@ -31,9 +32,32 @@ class Company {
         }
     }
 
+    static async get(handle) {
+        const result = await db.query(`SELECT * FROM companies WHERE handle=$1`, [handle]);
+        if (!result.rows[0]) {
+            throw new ExpressError(`No such company:${handle}`, 404);
+        }
+        return result.rows[0];
+    }
+
     static async create(data) {
         const result = await db.query(`INSERT INTO companies VALUES ($1, $2, $3, $4, $5) RETURNING *`, [data.handle, data.name, data.num_employees, data.description, data.logo_url]);
         return result.rows[0];
+    }
+
+    static async update(handle, body) {
+        /**  function sqlForPartialUpdate(table, items, key, id)*/
+        let { query, values } = sqlForPartialUpdate("companies", body, "handle", handle);
+        const result = await db.query(query, values);
+        return result.rows[0];
+    }
+
+    static async remove(handle) {
+        const result = await db.query(`DELETE FROM companies WHERE handle=$1 RETURNING handle`, [handle]);
+
+        if (result.rows.length === 0) {
+            throw new ExpressError(`Can't find company ${handle} to delete!`, 404);
+        }
     }
 }
 
