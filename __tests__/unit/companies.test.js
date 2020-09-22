@@ -5,10 +5,11 @@ const db = require("../../db");
 const app = require("../../app");
 const Company = require("../../models/company");
 const Job = require("../../models/job");
+const User = require("../../models/user");
 
 describe("Test companies routes", function () {
     beforeEach(async function () {
-        // await db.query("DELETE FROM jobs");
+        await db.query("DELETE FROM users");
         await db.query("DELETE FROM companies");
         let u = await Company.create({
             handle: "TSLA",
@@ -23,10 +24,20 @@ describe("Test companies routes", function () {
             equity: 0.1,
             company_handle: "TSLA"
         });
+        await request(app).post("/users").send({
+            username: "testguy",
+            password: "test",
+            first_name: "test",
+            last_name: "guy",
+            email: "test@gg.com",
+            is_admin: true
+        });
     });
 
     test("GET /companies/", async function () {
-        let response = await request(app).get("/companies");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).get("/companies").send({ _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.companies[0].handle).toEqual("TSLA");
         expect(response.body.companies[0].name).toEqual("Tesla");
@@ -36,7 +47,9 @@ describe("Test companies routes", function () {
     });
 
     test("GET /companies?search=es", async function () {
-        let response = await request(app).get("/companies?search=es");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).get("/companies?search=es").send({ _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.companies[0].handle).toEqual("TSLA");
         expect(response.body.companies[0].name).toEqual("Tesla");
@@ -46,18 +59,24 @@ describe("Test companies routes", function () {
     });
 
     test("GET /companies?search=pp", async function () {
-        let response = await request(app).get("/companies?search=pp");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).get("/companies?search=pp").send({ _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.companies).toEqual([]);
     });
 
     test("GET /companies?min_employees=100&&max_employees=40", async function () {
-        let response = await request(app).get("/companies?min_employees=100&&max_employees=40");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).get("/companies?min_employees=100&&max_employees=40").send({ _token: token });
         expect(response.statusCode).toEqual(400);
     });
 
     test("GET /companies/:handle", async function () {
-        let response = await request(app).get("/companies/TSLA");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).get("/companies/TSLA").send({ _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.company.handle).toEqual("TSLA");
         expect(response.body.company.name).toEqual("Tesla");
@@ -66,14 +85,19 @@ describe("Test companies routes", function () {
     });
 
     test("Failing GET /companies/:handle", async function () {
-        let response = await request(app).get("/companies/TS");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).get("/companies/TS").send({ _token: token });
         expect(response.statusCode).toEqual(404);
     });
 
     test("POST /companies", async function () {
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
         let response = await request(app).post("/companies").send({
             handle: "AAPL",
-            name: "Apple"
+            name: "Apple",
+            _token: token
         });
         expect(response.statusCode).toEqual(201);
         expect(response.body.company.handle).toEqual("AAPL");
@@ -81,37 +105,50 @@ describe("Test companies routes", function () {
     });
 
     test("Failing POST /companies", async function () {
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
         let response = await request(app).post("/companies").send({
             handle: "AAPL",
+            _token: token
         });
         expect(response.statusCode).toEqual(400);
     });
 
     test("PATCH /companies/:handle", async function () {
-        let response = await request(app).patch("/companies/TSLA").send({ name: "Tesla Inc.", logo_url: "Tesla logo" });
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).patch("/companies/TSLA").send({ name: "Tesla Inc.", logo_url: "Tesla logo", _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.company.name).toEqual("Tesla Inc.");
         expect(response.body.company.logo_url).toEqual("Tesla logo");
     });
 
     test("Failing PATCH /companies/:handle with attempt to change handle", async function () {
-        let response = await request(app).patch("/companies/TSLA").send({ handle: "TES" });
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).patch("/companies/TSLA").send({ handle: "TES", _token: token });
         expect(response.statusCode).toEqual(400);
     });
 
     test("Failing PATCH /companies/:handle with wrong update datatype", async function () {
-        let response = await request(app).patch("/companies/TSLA").send({ description: 12 });
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).patch("/companies/TSLA").send({ description: 12, _token: token });
         expect(response.statusCode).toEqual(400);
     });
 
     test("DELETE /companies/:handle", async function () {
-        let response = await request(app).delete("/companies/TSLA");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).delete("/companies/TSLA").send({ _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.message).toEqual("Company deleted");
     });
 
     test("Failing DELETE /companies/:handle", async function () {
-        let response = await request(app).delete("/companies/TSL");
+        let loginRes = await request(app).post("/login").send({ username: "testguy", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).delete("/companies/TSL").send({ _token: token });
         expect(response.statusCode).toEqual(404);
     });
 });

@@ -37,8 +37,8 @@ class Job {
         if (!result.rows[0]) {
             throw new ExpressError(`No such job:${id}`, 404);
         }
-        let comp_handle = result.rows[0].company_handle;
-        const companyInfo = await db.query(`SELECT * FROM companies WHERE handle=$1`, [comp_handle]);
+        let compHandle = result.rows[0].company_handle;
+        const companyInfo = await db.query(`SELECT * FROM companies WHERE handle=$1`, [compHandle]);
         let job = result.rows[0];
         job.company = companyInfo.rows[0];
         return job;

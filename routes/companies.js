@@ -6,13 +6,14 @@ const Company = require("../models/company");
 const companySchema = require("../schema/companySchema.json");
 const companyPatchSchema = require("../schema/companyPatchSchema.json");
 const ExpressError = require("../helpers/expressError");
+const { ensureLoggedIn, ensureIsAdmin } = require("../middleware/auth");
 
 /** GET / - get the companies list. Querying with search, min_employess, max_employees allowed.
  * 
  * => {companies : [{handle, name, num_employees, description, logo_url}, ...]}
  * 
  **/
-router.get("/", async (req, res, next) => {
+router.get("/", ensureLoggedIn, async (req, res, next) => {
     try {
         const companies = await Company.all(req.query);
         return res.json({ companies })
@@ -26,7 +27,7 @@ router.get("/", async (req, res, next) => {
  * => {company : companyData}
  * 
  **/
-router.get("/:handle", async (req, res, next) => {
+router.get("/:handle", ensureLoggedIn, async (req, res, next) => {
     try {
         const company = await Company.get(req.params.handle);
         return res.json({ company })
@@ -41,7 +42,7 @@ router.get("/:handle", async (req, res, next) => {
  *
  **/
 
-router.post("/", async (req, res, next) => {
+router.post("/", ensureIsAdmin, async (req, res, next) => {
     try {
         const result = jsonschema.validate(req.body, companySchema);
         if (!result.valid) {
@@ -62,7 +63,7 @@ router.post("/", async (req, res, next) => {
  *
  **/
 
-router.patch("/:handle", async (req, res, next) => {
+router.patch("/:handle", ensureIsAdmin, async (req, res, next) => {
     try {
         if (req.body.handle) {
             throw new ExpressError("Can't change handles!", 400);
@@ -90,7 +91,7 @@ router.patch("/:handle", async (req, res, next) => {
  *
  **/
 
-router.delete("/:handle", async (req, res, next) => {
+router.delete("/:handle", ensureIsAdmin, async (req, res, next) => {
     try {
         await Company.remove(req.params.handle);
         return res.json({ message: "Company deleted" });

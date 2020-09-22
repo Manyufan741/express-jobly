@@ -6,13 +6,14 @@ const Job = require("../models/job");
 const jobPostSchema = require("../schema/jobPostSchema.json");
 const jobPatchSchema = require("../schema/jobPatchSchema.json");
 const ExpressError = require("../helpers/expressError");
+const { ensureLoggedIn, ensureIsAdmin } = require("../middleware/auth");
 
 /** GET / - get the jobs list. Querying with search, min_salary, max_salary allowed.
  * 
  * => {jobs : [{handle, name, num_employees, description, logo_url}, ...]}
  * 
  **/
-router.get("/", async (req, res, next) => {
+router.get("/", ensureLoggedIn, async (req, res, next) => {
     try {
         const jobs = await Job.all(req.query);
         return res.json({ jobs })
@@ -26,7 +27,7 @@ router.get("/", async (req, res, next) => {
  * => {job : jobData}
  * 
  **/
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", ensureLoggedIn, async (req, res, next) => {
     try {
         const job = await Job.get(req.params.id);
         return res.json({ job })
@@ -41,7 +42,7 @@ router.get("/:id", async (req, res, next) => {
  *
  **/
 
-router.post("/", async (req, res, next) => {
+router.post("/", ensureIsAdmin, async (req, res, next) => {
     try {
         const result = jsonschema.validate(req.body, jobPostSchema);
         if (!result.valid) {
@@ -62,7 +63,7 @@ router.post("/", async (req, res, next) => {
  *
  **/
 
-router.patch("/:id", async (req, res, next) => {
+router.patch("/:id", ensureIsAdmin, async (req, res, next) => {
     try {
         if (req.body.id) {
             throw new ExpressError("Can't change id!", 400);
@@ -90,7 +91,7 @@ router.patch("/:id", async (req, res, next) => {
  *
  **/
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", ensureIsAdmin, async (req, res, next) => {
     try {
         await Job.remove(req.params.id);
         return res.json({ message: "Job deleted" });
