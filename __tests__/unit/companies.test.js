@@ -5,7 +5,6 @@ const db = require("../../db");
 const app = require("../../app");
 const Company = require("../../models/company");
 const Job = require("../../models/job");
-const User = require("../../models/user");
 
 describe("Test companies routes", function () {
     beforeEach(async function () {

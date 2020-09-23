@@ -46,6 +46,15 @@ class Job {
 
     static async create(data) {
         const result = await db.query(`INSERT INTO jobs (title, salary, equity, company_handle) VALUES ($1, $2, $3, $4) RETURNING *`, [data.title, data.salary, data.equity, data.company_handle]);
+        let job_id = result.rows[0].id;
+        /**if tech is speficied, insert table "requirements" to connect the job and the tech */
+        if (data.tech) {
+            let tech_result = await db.query(`SELECT * FROM technologies WHERE tech_code=$1`, [data.tech]);
+            if (!tech_result.rows[0]) {
+                await db.query(`INSERT INTO technologies VALUES ($1, $2)`, [data.tech, data.tech]);
+            }
+            await db.query(`INSERT INTO requirements VALUES ($1, $2)`, [data.tech, job_id])
+        }
         return result.rows[0];
     }
 
@@ -53,6 +62,11 @@ class Job {
         /**  function sqlForPartialUpdate(table, items, key, id)*/
         let { query, values } = sqlForPartialUpdate("jobs", body, "id", id);
         const result = await db.query(query, values);
+        return result.rows[0];
+    }
+
+    static async apply(job_id, username, state) {
+        const result = await db.query(`INSERT INTO applications (username, job_id, state) VALUES($1, $2, $3) RETURNING *`, [username, job_id, state]);
         return result.rows[0];
     }
 

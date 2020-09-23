@@ -5,8 +5,10 @@ const jsonschema = require("jsonschema");
 const Job = require("../models/job");
 const jobPostSchema = require("../schema/jobPostSchema.json");
 const jobPatchSchema = require("../schema/jobPatchSchema.json");
+const applicationStateSchema = require("../schema/applicationStateSchema.json");
 const ExpressError = require("../helpers/expressError");
 const { ensureLoggedIn, ensureIsAdmin } = require("../middleware/auth");
+const app = require("../app");
 
 /** GET / - get the jobs list. Querying with search, min_salary, max_salary allowed.
  * 
@@ -52,6 +54,27 @@ router.post("/", ensureIsAdmin, async (req, res, next) => {
         }
         const job = await Job.create(req.body);
         return res.status(201).json({ job });
+    } catch (err) {
+        next(err);
+    }
+});
+
+/** POST /:id/apply - change the status of an application
+ *
+ * => {message : new-state}
+ *
+ **/
+
+router.post("/:id/apply", ensureLoggedIn, async (req, res, next) => {
+    try {
+        const result = jsonschema.validate(req.body, applicationStateSchema);
+        if (!result.valid) {
+            let listOfErrors = result.errors.map(error => error.stack);
+            let error = new ExpressError(listOfErrors, 400);
+            return next(error);
+        }
+        const jobState = await Job.apply(req.params.id, req.user.username, req.body.state);
+        return res.json({ message: jobState.state });
     } catch (err) {
         next(err);
     }

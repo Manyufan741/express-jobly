@@ -70,26 +70,27 @@ describe("Test users routes", function () {
     });
 
     test("PATCH /users/:username", async function () {
-        let response = await request(app).patch("/users/BOOOJ").send({ first_name: "BO", last_name: "Jack" });
+        let loginRes = await request(app).post("/login").send({ username: "BOOOJ", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).patch("/users/BOOOJ").send({ first_name: "BO", last_name: "Jack", _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.user.first_name).toEqual("BO");
         expect(response.body.user.last_name).toEqual("Jack");
     });
 
     test("Failing PATCH /users/:username with wrong update datatype", async function () {
-        let response = await request(app).patch("/users/BOOOJ").send({ first_name: 109 });
+        let loginRes = await request(app).post("/login").send({ username: "BOOOJ", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).patch("/users/BOOOJ").send({ first_name: 109, _token: token });
         expect(response.statusCode).toEqual(400);
     });
 
     test("DELETE /users/:username", async function () {
-        let response = await request(app).delete("/users/BOOOJ");
+        let loginRes = await request(app).post("/login").send({ username: "BOOOJ", password: "test" });
+        let token = loginRes.body.token;
+        let response = await request(app).delete("/users/BOOOJ").send({ _token: token });
         expect(response.statusCode).toEqual(200);
         expect(response.body.message).toEqual("User deleted");
-    });
-
-    test("Failing DELETE /users/:username", async function () {
-        let response = await request(app).delete("/users/BO");
-        expect(response.statusCode).toEqual(404);
     });
 });
 

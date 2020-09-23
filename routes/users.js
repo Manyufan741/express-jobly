@@ -62,6 +62,24 @@ router.get("/:username", async (req, res, next) => {
     }
 });
 
+/** GET /:username/skillmatch - get the jobs that matches the user's skill
+     *
+     * => {user: {username, first_name, last_name, email, photo_url, skill, jobs}}
+     *
+     **/
+
+router.get("/:username/skillmatch", ensureCorrectUser, async (req, res, next) => {
+    try {
+        if (!req.body.skill) {
+            throw new ExpressError("Please specify a skill!", 400);
+        }
+        const user = await User.match(req.params.username, req.body.skill);
+        return res.json({ user });
+    } catch (err) {
+        next(err);
+    }
+});
+
 /** PATCH /:username - update user info
      *
      * => {users: {username, first_name, last_name, email, photo_url}}
